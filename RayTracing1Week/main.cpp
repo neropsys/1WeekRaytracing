@@ -4,6 +4,9 @@
 #include "hitableList.h"
 #include "sphere.h"
 #include <float.h>
+#include "Camera.h"
+#include <cstdlib>
+#include <time.h>
 vec3 color(const ray& r, hitable* world)
 {
 	hit_record rec;
@@ -28,6 +31,7 @@ int main()
 
 	int nx = 800;
 	int ny = 400;
+	int ns = 100;
 	file << "P3\n" << nx << " " << ny << "\n255\n";
 	
 	vec3 lower_left_corner(-2, -1, -1);
@@ -39,17 +43,30 @@ int main()
 	list[0] = new sphere(vec3(0, 0, -1), 0.5);
 	list[1] = new sphere(vec3(0, -100.5, -1), 100);
 	hitable* world = new hitable_list(list, 2);
+	Camera cam;
 	for (int j = ny - 1; j >= 0; j--)
 	{
 		for (int i = 0; i < nx; i++)
 		{
-			float u = float(i) / float(nx);
-			float v = float(j) / float(ny);
 
-			ray r(origin, lower_left_corner + u * horz + v * vert);
+			vec3 col(0, 0, 0);
+			srand(time(NULL));
+			for (int s = 0; s < ns; s++)
+			{
+
+				//cout << static_cast <float> (rand()) / static_cast <float> (RAND_MAX) << endl;
+				float u = float(i + static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) / float(nx);
+				float v = float(j + static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) / float(ny);
+
+				ray r = cam.get_ray(u, v);// (origin, lower_left_corner + u * horz + v * vert);
+
+				vec3 p = r.point_at_parameter(2.0);
+				col += color(r, world);
+			}
+
 		
-			vec3 p = r.point_at_parameter(2.0);
-			vec3 col = color(r, world);
+
+			col /= float(ns);
 
 			int ir = int(255.99 * col[0]);
 			int ig = int(255.99 * col[1]);
