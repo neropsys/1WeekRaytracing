@@ -154,8 +154,3 @@ class vec3 {
 		}
 
 };
-
-vec3 unit_vector(vec3 v)
-{
-	return v / v.length();
-}

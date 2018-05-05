@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "ray.h"
+#include "material.h"
 #include "hitableList.h"
 #include "sphere.h"
 #include <float.h>
@@ -8,26 +9,24 @@
 #include <cstdlib>
 #include <time.h>
 #include <ppl.h>
-#define DRAND48 static_cast <float> (rand()) / static_cast <float> (RAND_MAX)
-vec3 random_in_unit_sphere() {
-	vec3 p;
-	do {
-		p = 2.0 * vec3(DRAND48, DRAND48, DRAND48) - vec3(1, 1, 1);
-		
-	} while (p.length_sqrt() >= 1.0);
-	return p;
-}
-vec3 color(const ray& r, hitable* world)
+#include <vector>
+vec3 color(const ray& r, hitable* world, int depth)
 {
 	hit_record rec;
 	if (world->hit(r, 0.001, FLT_MAX, rec))
 	{
-		vec3 target = rec.p + rec.normal + random_in_unit_sphere();
-		return 0.5 * color(ray(rec.p, target - rec.p), world);
+		ray scattered;
+		vec3 attenuation;
+		if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+			return attenuation * color(scattered, world, depth + 1);
+		}
+		else {
+			return vec3(0, 0, 0);
+		}
 	}
 	else
 	{
-		vec3 unit_direction = unit_vector(r.direction());
+		vec3 unit_direction = r.direction().unit_vector();
 		float t = 0.5 * (unit_direction.y() + 1.0);
 		return (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(.5, .7, 1.0);
 	}
@@ -54,11 +53,16 @@ int main()
 	vec3 horz(4, 0, 0);
 	vec3 vert(0, 2, 0);
 	vec3 origin(0, 0, 0);
-	hitable* list[2];
+	std::vector<hitable*> list;
 
-	list[0] = new sphere(vec3(0, 0, -1), 0.5);
-	list[1] = new sphere(vec3(0, -100.5, -1), 100);
-	hitable* world = new hitable_list(list, 2);
+	list.emplace_back(new sphere(vec3(0, 0, -1), 0.5, new lambertian(vec3(0.8, 0.3, 0.3))));
+	list.emplace_back(new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.8, 0.8, 0.0))));
+	list.emplace_back(new sphere(vec3(1, 0, -1), 0.5, new metal(vec3(0.8, 0.6, 0.2), 0.8)));
+	list.emplace_back(new sphere(vec3(-1, 0, -1), 0.5, new metal(vec3(0.8, 0.8, 0.8), 0.1)));
+
+	
+
+	hitable* world = new hitable_list(list.data(), 4);
 	Camera cam;
 
 	RGB** pixels = new RGB*[ny];
@@ -75,14 +79,14 @@ int main()
 			srand(time(NULL));
 			for (int s = 0; s < ns; s++)
 			{
-
+			
 				float u = float(i + static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) / float(nx);
 				float v = float(j + static_cast <float> (rand()) / static_cast <float> (RAND_MAX)) / float(ny);
 
 				ray r = cam.get_ray(u, v);
 
 				vec3 p = r.point_at_parameter(2.0);
-				col += color(r, world);
+				col += color(r, world, 0);
 			}
 
 			col /= float(ns);
@@ -111,10 +115,9 @@ int main()
 		}
 	}
 	file.close();
-	delete list[0];
-	list[0] = nullptr;
-	delete list[1];
-	list[1] = nullptr;
+	for (auto& it : list) {
+		delete it;
+	}
 	parallel_for(int(0), ny, [&](int i) {
 		delete pixels[i];
 	});
