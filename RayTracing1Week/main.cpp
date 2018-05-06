@@ -63,7 +63,7 @@ int main()
 	
 
 	hitable* world = new hitable_list(list.data(), 4);
-	Camera cam;
+	Camera cam(vec3(-2, 2, 1), vec3(0, 0, -1), vec3(0, 1, 0), 90, float(nx) / float(ny));
 
 	RGB** pixels = new RGB*[ny];
 	parallel_for(int(0), ny, [&](int i) {
