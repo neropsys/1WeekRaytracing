@@ -9,9 +9,11 @@ public:
 	vec3 lower_left_corner;
 	vec3 horizontal;
 	vec3 vertical;
-	Camera(vec3 lookFrom, vec3 lookAt, vec3 vup, float vFov, float aspect)
+	float lens_radius;
+	vec3 u, v, w;
+	Camera(vec3 lookFrom, vec3 lookAt, vec3 vup, float vFov, float aspect, float aperture, float focus_dist)
 	{
-		vec3 u, v, w;
+		lens_radius = aperture / 2;
 		float theta = vFov * M_PI / 180;
 		float half_height = tan(theta / 2);
 		float half_width = aspect * half_height;
@@ -20,15 +22,10 @@ public:
 		w = (lookFrom - lookAt).unit_vector();
 		u = cross(vup, w).unit_vector();
 		v = cross(w, u);
-		lower_left_corner = vec3(-half_width, -half_height, -1);
-		lower_left_corner = origin - half_width * u - half_height * v - w;
-		horizontal = 2 * half_width * u;
-		vertical = 2 * half_height * v;
+		lower_left_corner = origin - half_width * focus_dist * u - half_height * focus_dist * v - focus_dist * w;
+		horizontal = 2 * half_width * focus_dist* u;
+		vertical = 2 * half_height * focus_dist * v;
 	}
-	ray get_ray(float u, float v)
-	{
-		return ray(origin, lower_left_corner +u * horizontal + v * vertical - origin);
-	}
-
+	ray get_ray(float s, float t);
 
 };

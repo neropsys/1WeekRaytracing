@@ -117,6 +117,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="material.cpp" />
+    <ClCompile Include="Camera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />

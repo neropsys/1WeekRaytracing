@@ -62,8 +62,15 @@ int main()
 	list.emplace_back(new sphere(vec3(-1, 0, -1), -0.45, new dielectric(1.5)));
 	
 
-	hitable* world = new hitable_list(list.data(), 4);
-	Camera cam(vec3(-2, 2, 1), vec3(0, 0, -1), vec3(0, 1, 0), 90, float(nx) / float(ny));
+	hitable* world = new hitable_list(list.data(), list.size());
+
+	vec3 lookfrom(3, 3, 2);
+	vec3 lookat(0, 0, -1);
+	float dist_to_focus = (lookfrom - lookat).length();
+	float aperture = 2.0;
+
+
+	Camera cam(lookfrom,lookat, vec3(0, 1, 0), 20, float(nx) / float(ny), aperture, dist_to_focus);
 
 	RGB** pixels = new RGB*[ny];
 	parallel_for(int(0), ny, [&](int i) {
