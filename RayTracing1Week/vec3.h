@@ -25,13 +25,6 @@ class vec3 {
 		inline vec3 operator-() const{return vec3(-e[0], -e[1], -e[2]); }
 		inline float operator[](int i) const { return e[i]; }
 		inline float& operator[](int i){ return e[i]; }
-// 		
-// 		inline vec3& operator+=(const vec3& v2);
-// 		inline vec3& operator-=(const vec3& v2);
-// 		inline vec3& operator*=(const vec3& v2);
-// 		inline vec3& operator/=(const vec3& v2);
-// 		inline vec3& operator*=(const float t);
-// 		inline vec3& operator/=(const float t);
 
 		inline float length() const
 		{
@@ -40,11 +33,6 @@ class vec3 {
 		inline float length_sqrt() const
 		{
 			return e[0] * e[0] + e[1] * e[1] + e[2] * e[2];
-		}
-		inline void make_unit_vector()
-		{
-			float k = 1.0f / sqrt(e[0] * e[0] + e[1] * e[1] + e[2] * e[2]);
-			e[0] *= k; e[1] *= k; e[2] *= k;
 		}
 
 		friend inline std::istream& operator>>(std::istream& is, vec3& t)
@@ -148,7 +136,7 @@ class vec3 {
 			e[2] *= k;
 			return *this;
 		}
-		inline vec3 unit_vector()
+		inline vec3 unit_vector() const
 		{
 			return *this / length();
 		}

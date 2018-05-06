@@ -21,3 +21,10 @@ public:
 	// material을(를) 통해 상속됨
 	virtual bool scatter(const ray & r_in, const hit_record & rec, vec3 & attenuation, ray & scattered) const override;
 };
+class dielectric : public material {
+public:
+	dielectric(float ri) :ref_idx(ri) {}
+
+	virtual bool scatter(const ray& r_in, const hit_record& rec, vec3& attenuation, ray& scattered)const;
+	float ref_idx;
+};
